@@ -110,7 +110,11 @@ button {
 button:hover {
   transform: scale(110%);
 }
-
+#current_icon{
+  height: 60px;
+  width: 60px;
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(82deg) brightness(105%) contrast(105%)
+}
 #current_temp {
   font-size: 60px;
   font-weight: 700;
@@ -147,7 +151,7 @@ button:hover {
 .main_info {
     width: 240px;
     height: 320px;
-    border: 1px solid white;
+    /* border: 1px solid white; */
     font-weight: 600;
     color: white;
     display: flex;
@@ -165,21 +169,43 @@ button:hover {
     margin-top: 40px;
     margin-bottom: 20px;
     height: 100px;
-    background-color: yellow;
+    user-select: none;
+    box-shadow: 0 0 50px -5px rgba(0, 0, 0, 0.25);
 }
 .forecast >div{
     flex-basis: 25%;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     height: 100%;
     transition: 300ms ease;
     background-color: #222831;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    font-size: 15px;
+    font-weight: normal;
+    cursor: pointer;
 }
-.forecast>div:hover{
-    transform: scale(1.1);
+.forecast>div:hover, .active{
+    transform: scale(1.1) !important;
+    background-color: white !important;
+    color: #222831 !important;
+}
+.forecast>div:hover img, .active img{
+  filter: invert(12%) sepia(33%) saturate(372%) hue-rotate(176deg) brightness(101%) contrast(93%) !important;
+}
+#small_day{
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+#small_temp{
+  font-weight: 600;
+  font-size: 18px;
+}
+.forecast img{
+  width: 35px;
+  height: 35px;
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(82deg) brightness(105%) contrast(105%)
 }
 

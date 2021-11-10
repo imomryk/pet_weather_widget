@@ -5,6 +5,62 @@ fetch("keys.txt")
         const info = document.querySelector(".info")
         weather.classList.add("blur")
         info.classList.add("blur")
+
+        // Иконки погоды
+        const getWeatherIcon = function (obj) {
+            const weatherIcons = {
+
+                ["clear day"]: './imgs/Weather_icons/clear_day.svg',
+                ["clear night"]: './imgs/Weather_icons/clear_night.svg',
+                ["cloudy day"]: './imgs/Weather_icons/cloudy_day.svg',
+                ["cloudy night"]: './imgs/Weather_icons/cloudy_night.svg',
+                ["Clouds"]: './imgs/Weather_icons/clouds.svg',
+                ["Drizzle"]: './imgs/Weather_icons/drizzle.svg',
+                ["Mist"]: './imgs/Weather_icons/mist.svg',
+                ["Rain"]: './imgs/Weather_icons/rain.svg',
+                ["Snow"]: './imgs/Weather_icons/snow.svg',
+                ["Thunderstorm"]: './imgs/Weather_icons/thunderstorm.svg',
+            }
+
+            if (obj.main == "Mist" || obj.main == "Smoke" || obj.main == "Haze" || obj.main == "Dust" || obj.main == "Fog" || obj.main == "Sand" || obj.main == "Dust" || obj.main == "Ash" || obj.main == "Squall" || obj.main == "Tornado") {
+                return weatherIcons.mist
+            }
+
+            if (obj.main == "Clear" && obj.icon == "01d") {
+                return weatherIcons["clear day"]
+            } else if (obj.main == "Clear" && obj.icon == "01n") {
+                return weatherIcons["clear night"]
+            }
+
+            if (obj.main == "Clouds" && obj.icon == "02d") {
+                return weatherIcons["cloudy day"]
+            } else if (obj.main == "Clouds" && obj.icon == "02n") {
+                return weatherIcons["cloudy night"]
+            }
+
+            return weatherIcons[obj.main]
+        }
+        // Функция рендера
+        const renderWeather = function (dailyweatherArr, index, timezone_offset) {
+            weather.classList.add("blur")
+            info.classList.add("blur")
+            const currDate = new Date(dailyweatherArr[index].dt * 1000 + timezone_offset)
+            const currDateSunrise = new Date((dailyweatherArr[index].sunrise + timezone_offset) * 1000)
+            const currDateSunset = new Date((dailyweatherArr[index].sunset + timezone_offset) * 1000)
+            document.getElementById("date_day").innerText = `${currDate.getUTCDate()}.${currDate.getUTCMonth() + 1}.${currDate.getUTCFullYear()}`
+            document.getElementById("date_dayname").innerText = `${days[currDate.getDay()]}`
+            document.getElementById("current_temp").innerHTML = `${Math.round(dailyweatherArr[index].temp.eve)}&deg;C`
+            document.getElementById("current_icon").setAttribute("src", getWeatherIcon(dailyweatherArr[index].weather[0]))
+            document.getElementById("current_description").innerText = `${dailyweatherArr[index].weather[0].main}`
+            document.getElementById("uvi").innerText = Math.round(dailyweatherArr[index].uvi)
+            document.getElementById("humidity").innerText = Math.round(dailyweatherArr[index].humidity) + "%"
+            document.getElementById("wind").innerText = dailyweatherArr[index].wind_speed + "m/s"
+            document.getElementById("sunrize").innerText = currDateSunrise.toGMTString().slice(17, 22)
+            document.getElementById("sunset").innerText = currDateSunset.toGMTString().slice(17, 22)
+            weather.classList.remove("blur")
+            info.classList.remove("blur")
+        }
+
         // Выдвижной блок
         document.querySelector(".main_weather").addEventListener("click", e => {
 
@@ -46,10 +102,12 @@ fetch("keys.txt")
                 .then(response => response.json())
                 .then(resultReverseGeo => {
                     console.log(resultReverseGeo)
+                    const currCity = resultReverseGeo.features[0].properties.city
+                    const currCountry = resultReverseGeo.features[0].properties.country_code.toUpperCase()
+                    document.getElementById("search").value = `${currCity}, ${currCountry}`
 
-                    let query = `https://api.openweathermap.org/data/2.5/onecall?exclude=hourly,minutely,alerts&appid=${keys.openweather}&units=metric&lat=${latitude}&lon=${longitude}`
                     // Weather Api
-                    fetch(query)
+                    fetch(`https://api.openweathermap.org/data/2.5/onecall?exclude=hourly,minutely,alerts&appid=${keys.openweather}&units=metric&lat=${latitude}&lon=${longitude}`)
                         .then(response => response.json())
                         .then(resultWeather => {
 
@@ -57,33 +115,53 @@ fetch("keys.txt")
                             fetch(`https://pixabay.com/api/?key=${keys.pixabay}&orientation=vertical&per_page=3&q=${resultReverseGeo.features[0].properties.city}`)
                                 .then(response => response.json())
                                 .then(result => {
+                                    // render Image
                                     document.querySelector(".img_container").style.backgroundImage = ""
                                     if (result.hits.length > 0) {
                                         document.querySelector(".img_container").style.backgroundImage = `url(${result.hits[0].previewURL})`
                                     }
 
-
-
                                     console.log(resultWeather)
-                                    const currDate = new Date(resultWeather.current.dt * 1000 + resultWeather.timezone_offset)
-                                    let currCity = resultReverseGeo.features[0].properties.city
-                                    let currCountry = resultReverseGeo.features[0].properties.country_code.toUpperCase()
-                                    let currDateSunrise = new Date((resultWeather.current.sunrise + resultWeather.timezone_offset) * 1000)
-                                    let currDateSunset = new Date((resultWeather.current.sunset + resultWeather.timezone_offset) * 1000)
-                                    document.getElementById("search").value = `${currCity}, ${currCountry}`
-                                    document.getElementById("date_day").innerText = `${currDate.getUTCDate()}.${currDate.getUTCMonth() + 1}.${currDate.getUTCFullYear()}`
-                                    document.getElementById("date_dayname").innerText = `${days[currDate.getDay()]}`
-                                    document.getElementById("current_temp").innerHTML = `${Math.round(resultWeather.current.temp)}&deg;C`
-                                    document.getElementById("current_description").innerText = `${resultWeather.current.weather[0].main}`
-                                    document.getElementById("uvi").innerText = Math.round(resultWeather.current.uvi)
-                                    document.getElementById("humidity").innerText = Math.round(resultWeather.current.humidity) + "%"
-                                    document.getElementById("wind").innerText = resultWeather.current.wind_speed + "m/s"
-                                    document.getElementById("sunrize").innerText = currDateSunrise.toGMTString().slice(17, 22)
-                                    document.getElementById("sunset").innerText = currDateSunset.toGMTString().slice(17, 22)
 
 
-                                    weather.classList.remove("blur")
-                                    info.classList.remove("blur")
+                                    // render forecast
+                                    const forecast = document.querySelector(".forecast")
+                                    forecast.innerHTML=""
+                                    for (let i = 0; i < 4; i++) {
+                                        const oneDayForecast = document.createElement("div")
+                                        const oneDayDate = new Date(resultWeather.daily[i].dt * 1000 + resultWeather.timezone_offset)
+                                        console.log(oneDayDate.toGMTString().slice(0, 3))
+                                        if (i == 0) oneDayForecast.classList.add("active")
+                                        oneDayForecast.innerHTML = `
+                                            <img id="small_icon" src=${getWeatherIcon(resultWeather.daily[i].weather[0])}>
+                                            <span id="small_day">${oneDayDate.toGMTString().slice(0, 3)}</span>
+                                            <span id="small_temp">${Math.round(resultWeather.daily[i].temp.eve)}&deg;C</span>
+                                        `
+                                        const oneDayForecastHelper= function(e){
+                                            if(e.tagName=="SPAN"||e.tagName=="IMG"){
+                                                return e.parentElement
+                                            } else return e
+                                        }
+                                        oneDayForecast.addEventListener("click",(e)=>{
+                                            if(!(oneDayForecastHelper(e.target).classList.contains("active"))){
+                                                Array.from(forecast.children).forEach(e=>{
+                                                    e.classList.remove("active")
+                                                })
+                                                oneDayForecastHelper(e.target).classList.add("active")
+                                                renderWeather(resultWeather.daily, Array.from(forecast.children).indexOf(oneDayForecastHelper(e.target)),resultWeather.timezone_offset)
+                                                
+                                            }
+                                            
+
+                                        })
+                                        forecast.append(oneDayForecast)
+                                    }
+
+                                    // Render weather
+                                    renderWeather(resultWeather.daily, 0, resultWeather.timezone_offset)
+
+
+
                                 })
                                 .catch(err => console.log("err:", err))
                         })
