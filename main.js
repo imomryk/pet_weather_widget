@@ -1,11 +1,12 @@
-fetch("keys.txt")
-    .then(response => response.json())
-    .then(keys => {
+// fetch("keys.txt")
+//     .then(response => response.json())
+//     .then(keys => {
         const weather = document.querySelector(".main_weather")
         const info = document.querySelector(".info")
         weather.classList.add("blur")
         info.classList.add("blur")
-
+        const days = ["Sunday", "Monday", "Thuesday", "Wednesday", "Thursday", "Friday", "Saturday",]
+        const form = document.forms[0]
         // Иконки погоды
         const getWeatherIcon = function (obj) {
             const weatherIcons = {
@@ -69,10 +70,6 @@ fetch("keys.txt")
             }
 
         })
-
-        const days = ["Sunday", "Monday", "Thuesday", "Wednesday", "Thursday", "Friday", "Saturday",]
-        const form = document.forms[0]
-
         // Старт погоды при загрузке
         navigator.geolocation.getCurrentPosition(e => {
             let latitude = e.coords.latitude
@@ -98,7 +95,7 @@ fetch("keys.txt")
         })
         // Geo API cuz openweather dont return city name
         const weatherRequest = function (latitude, longitude) {
-            fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${keys.geoapi}`, { method: 'GET', })
+            fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=24b0b062d3c94efaab4bcca77b291472`, { method: 'GET', })
                 .then(response => response.json())
                 .then(resultReverseGeo => {
                     console.log(resultReverseGeo)
@@ -107,12 +104,12 @@ fetch("keys.txt")
                     document.getElementById("search").value = `${currCity}, ${currCountry}`
 
                     // Weather Api
-                    fetch(`https://api.openweathermap.org/data/2.5/onecall?exclude=hourly,minutely,alerts&appid=${keys.openweather}&units=metric&lat=${latitude}&lon=${longitude}`)
+                    fetch(`https://api.openweathermap.org/data/2.5/onecall?exclude=hourly,minutely,alerts&appid=c4c979e5736f06ccaf01358f455ee24e&units=metric&lat=${latitude}&lon=${longitude}`)
                         .then(response => response.json())
                         .then(resultWeather => {
 
                             // Pixabay API for bcg img
-                            fetch(`https://pixabay.com/api/?key=${keys.pixabay}&orientation=vertical&per_page=3&q=${resultReverseGeo.features[0].properties.city}`)
+                            fetch(`https://pixabay.com/api/?key=23641840-4160a4a239d12c5dd6197d014&orientation=vertical&per_page=3&q=${resultReverseGeo.features[0].properties.city}`)
                                 .then(response => response.json())
                                 .then(result => {
                                     // render Image
@@ -126,32 +123,32 @@ fetch("keys.txt")
 
                                     // render forecast
                                     const forecast = document.querySelector(".forecast")
-                                    forecast.innerHTML=""
+                                    forecast.innerHTML = ""
                                     for (let i = 0; i < 4; i++) {
                                         const oneDayForecast = document.createElement("div")
                                         const oneDayDate = new Date(resultWeather.daily[i].dt * 1000 + resultWeather.timezone_offset)
-                                        console.log(oneDayDate.toGMTString().slice(0, 3))
+                                        
                                         if (i == 0) oneDayForecast.classList.add("active")
                                         oneDayForecast.innerHTML = `
                                             <img id="small_icon" src=${getWeatherIcon(resultWeather.daily[i].weather[0])}>
                                             <span id="small_day">${oneDayDate.toGMTString().slice(0, 3)}</span>
                                             <span id="small_temp">${Math.round(resultWeather.daily[i].temp.eve)}&deg;C</span>
                                         `
-                                        const oneDayForecastHelper= function(e){
-                                            if(e.tagName=="SPAN"||e.tagName=="IMG"){
+                                        const oneDayForecastHelper = function (e) {
+                                            if (e.tagName == "SPAN" || e.tagName == "IMG") {
                                                 return e.parentElement
                                             } else return e
                                         }
-                                        oneDayForecast.addEventListener("click",(e)=>{
-                                            if(!(oneDayForecastHelper(e.target).classList.contains("active"))){
-                                                Array.from(forecast.children).forEach(e=>{
+                                        oneDayForecast.addEventListener("click", (e) => {
+                                            if (!(oneDayForecastHelper(e.target).classList.contains("active"))) {
+                                                Array.from(forecast.children).forEach(e => {
                                                     e.classList.remove("active")
                                                 })
                                                 oneDayForecastHelper(e.target).classList.add("active")
-                                                renderWeather(resultWeather.daily, Array.from(forecast.children).indexOf(oneDayForecastHelper(e.target)),resultWeather.timezone_offset)
-                                                
+                                                renderWeather(resultWeather.daily, Array.from(forecast.children).indexOf(oneDayForecastHelper(e.target)), resultWeather.timezone_offset)
+
                                             }
-                                            
+
 
                                         })
                                         forecast.append(oneDayForecast)
@@ -168,4 +165,4 @@ fetch("keys.txt")
                 })
                 .catch(error => console.log('error', error));
         }
-    })
+    // })
