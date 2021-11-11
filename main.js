@@ -82,7 +82,7 @@
             weather.classList.add("blur")
             info.classList.add("blur")
             console.log(form.elements[0].value)
-            fetch(`https://api.geoapify.com/v1/geocode/search?apiKey=${keys.geoapi}&text=${form.elements[0].value}`, { method: 'GET', })
+            fetch(`https://api.geoapify.com/v1/geocode/search?apiKey=24b0b062d3c94efaab4bcca77b291472&text=${form.elements[0].value}`, { method: 'GET', })
                 .then(response => response.json())
                 .then(result => {
                     const latitude = result.features[0].geometry.coordinates[1]
